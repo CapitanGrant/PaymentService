@@ -1,6 +1,6 @@
 from app.dao.base import BaseDAO
-from app.author.models import Author
+from app.payment.models import Payment
 
 
-class AuthorDAO(BaseDAO):
-    model = Author
+class PaymentsDAO(BaseDAO):
+    model = Payment

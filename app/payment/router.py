@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
-from app.dao.session_maker import SessionDep, TransactionSessionDep
+from app.dao.session_maker import SessionDep
+from app.payment.dao import PaymentsDAO
 from app.users.auth import get_current_admin_user, get_current_user
 from app.users.models import User
 from sqlalchemy.future import select
@@ -10,9 +11,9 @@ from sqlalchemy.future import select
 router = APIRouter(prefix="/payment", tags=["Payments"])
 
 
-@router.get("/all/", summary='Получить список всех авторов книг с пагинацией и фильтрацией')
-async def get_all_payments():
-    pass
+@router.get("/all/", summary='Получить список всех своих платежей')
+async def get_all_payments(user_data: User = Depends(get_current_user), session: AsyncSession = SessionDep):
+    return await PaymentsDAO.find_all(session=session, filters=None)
 
 # @router.get("/get_author_by_id/", summary='Получить автора по id')
 # async def get_author(id: int, user_data: User = Depends(get_current_admin_user), session: AsyncSession = SessionDep):

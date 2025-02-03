@@ -16,7 +16,7 @@ class User(Base):
     is_admin: Mapped[bool] = mapped_column(default=False, server_default=text('false'), nullable=False)
     is_super_admin: Mapped[bool] = mapped_column(default=False, server_default=text('false'), nullable=False)
 
-    account: Mapped['Account'] = relationship("Account", back_populates="user", uselist=False, lazy="joined")
+    account: Mapped[list['Account']] = relationship("Account", back_populates="user", lazy="joined", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"{self.__class__.__name__}(id={self.id})"

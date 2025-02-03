@@ -1,5 +1,9 @@
+from typing import List
+
 from pydantic import BaseModel, EmailStr, Field, validator, field_validator
 import re
+
+from app.account.schemas import SAccount
 
 
 class SUserRegister(BaseModel):
@@ -29,3 +33,9 @@ class SUserID(BaseModel):
 
 class SUserIsAdmin(BaseModel):
     is_admin: bool = Field(..., description='Роль пользователя')
+
+class SUserWithAccounts(BaseModel):
+    email: EmailStr = Field(..., description="Электронная почта")
+    first_name: str = Field(..., min_length=3, max_length=50, description="Имя, от 3 до 50 символов")
+    last_name: str = Field(..., min_length=3, max_length=50, description="Фамилия, от 3 до 50 символов")
+    account: List[SAccount]

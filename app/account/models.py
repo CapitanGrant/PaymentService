@@ -12,7 +12,7 @@ class Account(Base):
     balance: Mapped[float] = mapped_column(Float, default=0, nullable=False)
 
     payment: Mapped[list['Payment']] = relationship("Payment", back_populates="account",cascade="all, delete-orphan")
-    user: Mapped['User'] = relationship("User", back_populates="account", uselist=False)
+    user: Mapped['User'] = relationship("User", back_populates="account")
 
     def __str__(self):
         return f"Account(id={self.id}, user_id={self.user_id}, balance={self.balance})"
