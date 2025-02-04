@@ -4,8 +4,6 @@ from app.account.router import router as account_router
 from app.users.router import router as router_users
 from app.admin_panel.router import router as admin_panel_router
 
-# uvicorn app.main:app --port 8001
-
 app = FastAPI()
 
 

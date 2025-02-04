@@ -7,7 +7,7 @@ from app.users.models import User
 from app.account.dao import AccountsDAO
 from app.account.schemas import SAccountBalance, SAccountCreate
 
-router = APIRouter(prefix='/account', tags=['Счета'])
+router = APIRouter(prefix='/account', tags=['Account'])
 
 
 @router.get("/all_accounts_and_balances/", summary='Получить все счета и их баланс')

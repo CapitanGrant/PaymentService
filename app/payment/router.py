@@ -13,7 +13,7 @@ from app.users.auth import get_current_user
 from app.users.dao import UsersDAO
 from app.users.models import User
 
-from app.payment.schemas import SPaymentTransaction, SPayment, SPaymentSignature, SPaymentADD
+from app.payment.schemas import SPaymentTransaction, SPaymentSignature, SPaymentADD
 
 router = APIRouter(prefix="/payment", tags=["Payments"])
 
@@ -50,34 +50,40 @@ async def get_all_payments(user_data: User = Depends(get_current_user), session:
     return await PaymentsDAO.find_all(session=session, filters=None)
 
 
-@router.post("/webhook/")
+@router.post("/webhook/", summary='Обработка платежа')
 async def webhook(payload: SPaymentSignature, session: AsyncSession = TransactionSessionDep):
-    try:
+    if not verify_signature(payload):
+        logger.warning(f"Ошибка {payload.signature} в {payload.transaction_id} не корректна!")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid signature')
 
-        if not verify_signature(payload):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid signature')
+    transaction_id = payload.transaction_id
+    account_id = payload.account_id
+    amount = payload.amount
+    user_id = payload.user_id
 
-        transaction_id = payload.transaction_id
-        account_id = payload.account_id
-        amount = payload.amount
-        user_id = payload.user_id
-        find_user_id = await UsersDAO.find_one_or_none_by_id(session=session, data_id=user_id)
-        if not find_user_id:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
-        find_transaction_id = await PaymentsDAO.find_one_or_none(session=session, filters=SPaymentTransaction(
-            transaction_id=transaction_id))
-        if find_transaction_id:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Payment already processed')
+    existing_payment = await PaymentsDAO.find_one_or_none(
+        session=session, filters=SPaymentTransaction(
+            transaction_id=transaction_id)
+    )
+    if existing_payment:
+        logger.warning(f"Данный платеж: {transaction_id} уже обработан!")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Платеж уже обработан!")
 
-        find_account_id = await AccountsDAO.find_one_or_none(session=session, filters=SAccountID(id=account_id))
-        if not find_account_id:
-            await AccountsDAO.add(session=session, values=SAccountCreate(user_id=user_id, balance=amount))
-        current_amount = await AccountsDAO.find_one_or_none(session=session, filters=SAccountID(id=account_id))
-        update_balance = current_amount.balance + amount
-        await PaymentsDAO.add(session=session,
-                              values=SPaymentADD(transaction_id=transaction_id, account_id=account_id, amount=amount))
-        await AccountsDAO.update(session=session, values=SAccountBalance(balance=update_balance),
+    user = await UsersDAO.find_one_or_none_by_id(session=session, data_id=user_id)
+    if not user:
+        logger.warning(f"Пользователь: {user_id} не найден!")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь не найден!")
+    account = await AccountsDAO.find_one_or_none(session=session, filters=SAccountID(id=account_id))
+    if account:
+        new_balance = account.balance + amount
+        await AccountsDAO.update(session=session, values=SAccountBalance(balance=new_balance),
                                  filters=SAccountID(id=account_id))
-    except HTTPException as e:
-        logger.error(e)
-        raise e
+        logger.info(f"Обновление баланса для счета {account_id}: {new_balance}")
+    else:
+        logger.info(f"Создание нового счета для пользователя {user_id} с балансом {amount}")
+        await AccountsDAO.add(session=session, values=SAccountCreate(user_id=user_id, balance=amount))
+    await PaymentsDAO.add(session=session,
+                          values=SPaymentADD(transaction_id=transaction_id, account_id=account_id,
+                                             amount=amount))
+    logger.info(f"Оплата {transaction_id} прошла успешно для счета {account_id}")
+    return {"message": "Платеж прошел успешно!"}
