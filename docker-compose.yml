@@ -39,7 +39,23 @@ services:
     stdin_open: true
 
 
+  app:
+    build: .
+    container_name: dimatech_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    ports:
+      - "8001:8001"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    restart: unless-stopped
+
 volumes:
   pgdata:
     driver: local
-

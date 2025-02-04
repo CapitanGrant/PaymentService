@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel, EmailStr, Field, validator, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 import re
 
 from app.account.schemas import SAccount
@@ -20,8 +20,10 @@ class SUserRegister(BaseModel):
             raise ValueError('Номер телефона должен начинаться с "+" и содержать от 5 до 15 цифр')
         return value
 
+
 class SUserMail(BaseModel):
     email: EmailStr = Field(..., description="Электронная почта")
+
 
 class SUserAuth(BaseModel):
     email: EmailStr = Field(..., description="Электронная почта")
@@ -31,8 +33,10 @@ class SUserAuth(BaseModel):
 class SUserID(BaseModel):
     id: int = Field(..., description="ID пользователя")
 
+
 class SUserIsAdmin(BaseModel):
     is_admin: bool = Field(..., description='Роль пользователя')
+
 
 class SUserWithAccounts(BaseModel):
     email: EmailStr = Field(..., description="Электронная почта")

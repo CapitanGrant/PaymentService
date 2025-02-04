@@ -12,11 +12,10 @@ class Payment(Base):
     amount: Mapped[float] = mapped_column(Float, nullable=False)
 
     account: Mapped['Account'] = relationship("Account",
-                                               back_populates="payment", uselist=False)
-
+                                              back_populates="payment", uselist=False)
 
     def __str__(self):
-        return f"Payment(id={self.id}, transaction_id={self.transaction_id}, user_id={self.user_id}, account_id={self.account_id}, amount={self.amount}, created_at={self.created_at})"
+        return f"Payment(id={self.id}, transaction_id={self.transaction_id}, account_id={self.account_id}, amount={self.amount})"
 
     def __repr__(self):
         return self.__str__()
@@ -25,7 +24,6 @@ class Payment(Base):
         return {
             "id": self.id,
             "transaction_id": self.transaction_id,
-            "user_id": self.user_id,
             "account_id": self.account_id,
             "amount": float(self.amount)
         }

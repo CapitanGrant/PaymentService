@@ -3,7 +3,6 @@ from datetime import datetime, timedelta, timezone
 from app.config import get_auth_data
 
 
-
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(days=30)

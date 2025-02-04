@@ -1,16 +1,11 @@
-from fastapi import APIRouter, HTTPException, status, Response, Depends
-from sqlalchemy.orm import SessionTransaction
-from sqlalchemy.orm.sync import update
-
+from fastapi import APIRouter, HTTPException, status, Depends
 from app.account.schemas import SAccount
 from app.dao.session_maker import TransactionSessionDep, SessionDep
-from app.users.auth import get_password_hash, authenticate_user, get_current_user, get_current_super_admin_user, \
-    get_current_admin_user
+from app.users.auth import get_password_hash, get_current_admin_user
 from app.users.dao import UsersDAO
 from app.users.models import User
-from app.users.schemas import SUserRegister, SUserMail, SUserAuth, SUserIsAdmin, SUserID, SUserWithAccounts
+from app.users.schemas import SUserRegister, SUserMail, SUserWithAccounts
 from app.dao.database import AsyncSession
-from app.users.utils import create_access_token
 
 router = APIRouter(prefix='/admin', tags=['Admin'])
 

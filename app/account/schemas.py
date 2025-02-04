@@ -1,11 +1,17 @@
 from pydantic import BaseModel, Field
 
 
-class SAccountBase(BaseModel):
+class SAccountBalance(BaseModel):
     balance: float = Field(..., gt=0, description="Баланс должен быть положительным")
 
-class SAccountCreate(SAccountBase):
-    user_id: int
+
+class SAccountCreate(SAccountBalance):
+    user_id: int = Field(..., description="ID пользователя")
+
 
 class SAccount(SAccountCreate):
-    id: int
+    id: int = Field(..., description="ID счета")
+
+
+class SAccountID(BaseModel):
+    id: int = Field(..., description="ID счета")

@@ -11,7 +11,7 @@ class Account(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     balance: Mapped[float] = mapped_column(Float, default=0, nullable=False)
 
-    payment: Mapped[list['Payment']] = relationship("Payment", back_populates="account",cascade="all, delete-orphan")
+    payment: Mapped[list['Payment']] = relationship("Payment", back_populates="account", cascade="all, delete-orphan")
     user: Mapped['User'] = relationship("User", back_populates="account")
 
     def __str__(self):
